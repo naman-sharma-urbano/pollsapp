@@ -37,8 +37,26 @@ def todaysquestions_view(request):
 @api_view(['GET', 'POST'])
 def questions_view(request):
 	if request.method == 'GET':
-		# return HttpResponse("Not Implemented")
+		question_id = request.query_params.get("question_id")
+		status = request.query_params.get("status")
+		question_text = request.query_params.get("question_text")
+		pub_date = request.query_params.get("pub_date")
+		sort_by = request.query_params.get("sort_by", "pub_date")
+		sort_order = request.query_params.get("sort_order", "desc")
 		questions = Question.objects.filter(deleted=False)
+		if question_id:
+			questions = questions.filter(id=question_id)
+		if question_text:
+			questions = questions.filter(question_text=question_text)
+		if status:
+			questions = questions.filter(status=status)
+		if pub_date:
+			questions = questions.filter(pub_date=pub_date)
+		if sort_order == "asc":
+			questions = questions.order_by(sort_by)
+		else:
+			questions = questions.order_by(f"-{sort_by}")
+
 		serializer = QuestionSerializer(questions, many=True)
 		userqueryset = User.objects.all() 
 		userset = UserSerializer(userqueryset, context={'request': request}, many=True)
