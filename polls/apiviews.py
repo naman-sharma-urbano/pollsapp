@@ -37,6 +37,7 @@ def todaysquestions_view(request):
 @api_view(['GET', 'POST'])
 def questions_view(request):
 	if request.method == 'GET':
+		owner = request.query_params.get("owner")
 		question_id = request.query_params.get("question_id")
 		status = request.query_params.get("status")
 		question_text = request.query_params.get("question_text")
@@ -44,6 +45,8 @@ def questions_view(request):
 		sort_by = request.query_params.get("sort_by", "pub_date")
 		sort_order = request.query_params.get("sort_order", "desc")
 		questions = Question.objects.filter(deleted=False)
+		if owner:
+			questions = questions.filter(owner__username=owner)
 		if question_id:
 			questions = questions.filter(id=question_id)
 		if question_text:
@@ -51,7 +54,7 @@ def questions_view(request):
 		if status:
 			questions = questions.filter(status=status)
 		if pub_date:
-			questions = questions.filter(pub_date=pub_date)
+			questions = questions.filter(pub_date__icontains=pub_date)
 		if sort_order == "asc":
 			questions = questions.order_by(sort_by)
 		else:
